@@ -26,7 +26,7 @@ def request_hr():
 def request_rmssd():
     # TODO: Some kind of try-catch?
     address = 'http://127.0.0.1:8080/'
-    request = 'ecgnode/metric/{"type":"rmssd", "channels":["ch0"] , "time_window":[15], "arguments":[100]}'
+    request = 'ecgnode/metric/{"type":"rmssd", "channels":["ch0"] , "time_window":[300], "arguments":[100]}'
     return round(requests.get(address + request).json()[0]['return'])
 
 
@@ -42,18 +42,24 @@ def calculate_transition(current_value, target, increment):
     return current_value
 
 
+def render_text(font, string, value, color=(0, 0, 0)):
+    return font.render(string.ljust(7) + '{}'.format(value), 1, color)
+
+
 def main():
-    width = 300
-    height = 300
+    width = 600
+    height = 200
     pygame.init()
+    pygame.display.set_caption('HRV-monitor')
     screen = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
 
-    BACKGROUND_COLOR = (255, 255, 255)
+    BACKGROUND_COLOR = (0, 0, 0)
+    TEXT_COLOR = (255, 255, 255)
 
     last_update = time.time()
     update_interval = 1
-    font = pygame.font.SysFont('ProggySquareTT for Powerline', 50)
+    font = pygame.font.SysFont('Monospace', 70)
 
     target_hr = request_hr()
     current_hr = target_hr
@@ -61,8 +67,8 @@ def main():
     target_rmssd = request_rmssd()
     current_rmssd = target_rmssd
 
-    text_hr = font.render('HR: {}'.format(current_hr), 1, (0, 0, 0))
-    text_rmssd = font.render('RMSSD: {}'.format(current_rmssd), 1, (0, 0, 0))
+    text_hr = render_text(font, 'HR:', current_hr)
+    text_rmssd = render_text(font, 'RMSSD:', current_rmssd)
 
     increment_hr = 0.1
     increment_rmssd = 0.1
@@ -86,12 +92,12 @@ def main():
         current_hr = calculate_transition(current_hr, target_hr, increment_hr)
         current_rmssd = calculate_transition(current_rmssd, target_rmssd, increment_rmssd)
 
-        text_hr = font.render('HR:'.ljust(7) + '{}'.format(current_hr), 1, (0, 0, 0))
-        text_rmssd = font.render('RMSSD:'.ljust(7) +  '{}'.format(current_rmssd), 1, (0, 0, 0))
+        text_hr = render_text(font, 'HR:', current_hr, TEXT_COLOR)
+        text_rmssd = render_text(font, 'RMSSD:', current_rmssd, TEXT_COLOR)
 
         screen.fill(BACKGROUND_COLOR)
         screen.blit(text_hr, (10, 10))
-        screen.blit(text_rmssd, (10, 50))
+        screen.blit(text_rmssd, (10, 100))
 
         pygame.display.flip()
         clock.tick(60)
