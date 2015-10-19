@@ -26,7 +26,7 @@ def request_hr():
 def request_rmssd():
     # TODO: Some kind of try-catch?
     address = 'http://127.0.0.1:8080/'
-    request = 'ecgnode/metric/{"type":"rmssd", "channels":["ch0"] , "time_window":[300], "arguments":[100]}'
+    request = 'ecgnode/metric/{"type":"rmssd", "channels":["ch0"] , "time_window":[30], "arguments":[100]}'
     return round(requests.get(address + request).json()[0]['return'])
 
 
@@ -70,8 +70,8 @@ def main():
     text_hr = render_text(font, 'HR:', current_hr)
     text_rmssd = render_text(font, 'RMSSD:', current_rmssd)
 
-    increment_hr = 0.1
-    increment_rmssd = 0.1
+    increment_hr = 1.0
+    increment_rmssd = 1.0
 
     running = True
     while running:
@@ -89,8 +89,10 @@ def main():
             target_rmssd = request_rmssd()
             last_update = time.time()
 
-        current_hr = calculate_transition(current_hr, target_hr, increment_hr)
-        current_rmssd = calculate_transition(current_rmssd, target_rmssd, increment_rmssd)
+        #current_hr = calculate_transition(current_hr, target_hr, increment_hr)
+        #current_rmssd = calculate_transition(current_rmssd, target_rmssd, increment_rmssd)
+        current_hr = target_hr
+        current_rmssd = target_rmssd
 
         text_hr = render_text(font, 'HR:', current_hr, TEXT_COLOR)
         text_rmssd = render_text(font, 'RMSSD:', current_rmssd, TEXT_COLOR)
