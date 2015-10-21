@@ -127,6 +127,11 @@ def detect_r_peaks(ecg, fs=500):
     ind_rising = numpy.where(numpy.diff(ecg) == 1)[0]
     ind_falling = numpy.where(numpy.diff(ecg) == -1)[0]
 
+    # Jari Fix
+    if ind_rising.size == 0 or ind_falling.size == 0:
+        print('DEBUG')
+        return 1000 * numpy.ones((1, 5))
+
     ind_rising, ind_falling = adjust_indices(ind_rising, ind_falling)
 
     ind_rising = [(i - round(fs/4)) for i in ind_rising]
